@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--    Mapper namespace属性 区分不同表中查询的sql语句的名字冲突-->
+<!--    比如 A表 findById   B表 findById名 字冲突不识别，所以给不同的表的数据源添加一个前缀，对应的是namespace属性-->
+
+<mapper namespace="com.chuilun.dao.roleMapper">
+    <!--    id给当前的sql语句起一个识别id，最好和接口一致
+            parameterType  限制传入参数类型-->
+    <!--    resultType结果集封装的类型，只有查询才能用到
+            #{id}占位符里面的名字任意-->
+
+    <resultMap id="roleMap" type="com.chuilun.pojo.role" >
+        <id property="roleId" column="role_id" jdbcType="BIGINT"/>
+        <result property="roleName" column="role_name" jdbcType="VARCHAR"/>
+        <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+        <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
+        <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+        <result property="updateBy" column="update_by" jdbcType="VARCHAR"/>
+    </resultMap>
+
+
+    <!-- 主页面-->
+    <select id="findAll"  resultMap="roleMap" >
+    select * from role  ORDER BY create_at DESC
+</select>
+
+    <!--  根据名称搜索-->
+    <select id="search" parameterType="java.lang.String" resultMap="roleMap" >
+    select * from role where role_name like "%"#{roleName,jdbcType=VARCHAR}"%" ORDER BY create_at DESC
+    </select>
+
+<!--    根据角色名查询角色ID-->
+    <select id="findRoleId" parameterType="java.lang.String" resultType="java.lang.Integer">
+            select  role_id  from role where role_name= #{roleName,jdbcType=VARCHAR}
+    </select>
+
+<!--    添加角色-->
+    <insert id="addRole" useGeneratedKeys="true" keyProperty="roleId" parameterType="com.chuilun.pojo.role">
+        insert into role (role_name,create_at,create_by)values (#{roleName,jdbcType=VARCHAR},now(),#{createBy,jdbcType=VARCHAR})
+    </insert>
+
+<!--    编辑角色-->
+<update id="putRole" parameterType="com.chuilun.pojo.role" >
+        update role set role_name = #{roleName,jdbcType=VARCHAR} where role_id=#{roleId,jdbcType=BIGINT}
+</update>
+
+    <!--    根据id删除-->
+    <delete id="deleteId" parameterType="java.lang.Integer">
+    delete from role where role_id=#{roleId,jdbcType=BIGINT}
+    </delete>
+
+</mapper>

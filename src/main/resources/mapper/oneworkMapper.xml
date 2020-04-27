@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        <!--    Mapper namespace属性 区分不同表中查询的sql语句的名字冲突-->
+        <!--    比如 A表 findById   B表 findById名 字冲突不识别，所以给不同的表的数据源添加一个前缀，对应的是namespace属性-->
+
+<mapper namespace="com.chuilun.dao.oneworkMapper">
+<!--    id给当前的sql语句起一个识别id，最好和接口一致
+        parameterType  限制传入参数类型-->
+<!--    resultType结果集封装的类型，只有查询才能用到
+        #{id}占位符里面的名字任意-->
+
+    <resultMap id="oneWorkMap" type="com.chuilun.pojo.onework" >
+        <id property="oneId" column="one_id" jdbcType="BIGINT"/>
+        <result property="oneworkName" column="onework_name" jdbcType="VARCHAR" />
+        <result property="state" column="state" jdbcType="TINYINT"/>
+        <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+        <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
+        <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+        <result property="updateBy" column="update_by" jdbcType="VARCHAR"/>
+    </resultMap>
+
+
+    <!-- 主页面-->
+<select id="findAll"  resultMap="oneWorkMap" >
+    select * from  onework order by create_at desc
+</select>
+
+<!--    姓名和状态-->
+<select id="search" resultMap="oneWorkMap" >
+    SELECT * FROM  onework
+    <where>
+    <if  test="oneworkName!=null and oneworkName!=''">
+    onework_name = #{oneworkName,jdbcType=VARCHAR}
+    </if>
+    <if  test="state!=null">
+    AND state = #{state,jdbcType=TINYINT}
+    </if>
+    </where>
+    order by create_at desc
+</select>
+
+<!--    查询表中的记录数-->
+    <select id="countOne" resultType="java.lang.Integer">
+        select  count(*) from onework;
+    </select>
+
+<!--   根据ID查询状态  方便上下线-->
+<select id="state" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+select state from onework where one_id=#{oneId,jdbcType=BIGINT}
+</select>
+
+    <select id="findIdByName" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select one_id from onework  where onework_name=#{oneworkName,jdbcType=VARCHAR}
+    </select>
+
+<!--    添加-->
+    <insert id="addName" useGeneratedKeys="true" keyProperty="oneId" parameterType="com.chuilun.pojo.onework" >
+        INSERT INTO onework (onework_name,create_at) VALUES (#{oneworkName,jdbcType=VARCHAR},now())
+    </insert>
+
+<!--修改名称-->
+    <update id="putName" parameterType="com.chuilun.pojo.onework">
+        update onework set onework_name =#{oneworkName,jdbcType=VARCHAR} where one_id = #{oneId,jdbcType=BIGINT}
+    </update>
+
+<!--    上线-->
+    <update id="onLine" parameterType="java.lang.Integer">
+        update onework set state = 1 where one_id = #{oneId,jdbcType=BIGINT}
+    </update>
+
+<!--下线-->
+    <update id="offLine" parameterType="java.lang.Integer">
+        update onework set state = 0 where one_id = #{oneId,jdbcType=BIGINT}
+    </update>
+
+<!--    根据id删除-->
+<delete id="deleteId" parameterType="java.lang.Integer">
+    delete from onework where one_id = #{oneId}
+</delete>
+
+</mapper>

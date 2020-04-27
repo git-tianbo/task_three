@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+    <mapper namespace="com.chuilun.dao.bannerMapper">
+
+    <resultMap id="bannerMap" type="com.chuilun.pojo.banner" >
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="photo" column="photo" jdbcType="VARCHAR"/>
+        <result property="url" column="url" jdbcType="VARCHAR"/>
+        <result property="state" column="state" jdbcType="TINYINT"/>
+        <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+        <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
+        <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+        <result property="updateBy" column="update_by" jdbcType="VARCHAR"/>
+    </resultMap>
+
+<!--查询所有-->
+    <select id="findAll" resultMap="bannerMap">
+        select * from banner ORDER BY update_at DESC
+    </select>
+
+<!--    根据状态和创建人查询-->
+    <select id="search" resultMap="bannerMap">
+        select * from banner
+        <where>
+            <if test="state != null">
+                state= #{state,jdbcType=TINYINT}
+            </if>
+            <if test="createBy != null">
+                AND create_by = #{createBy,jdbcType=VARCHAR}
+            </if>
+            ORDER BY update_at DESC
+        </where>
+    </select>
+
+<!--    根据id查询状态-->
+    <select id="state" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+            select state from banner where id=#{id,jdbcType=BIGINT}
+    </select>
+
+<!--    添加新banner-->
+    <insert id="addBanner" useGeneratedKeys="true" keyProperty="id" parameterType="com.chuilun.pojo.banner">
+        insert into banner (photo,url,create_at,create_by) values
+         (#{photo,jdbcType=VARCHAR},#{url,jdbcType=VARCHAR},now(),#{createBy,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="putUrlAndPic" parameterType="com.chuilun.pojo.banner">
+        update banner set url =#{url,jdbcType=VARCHAR}, photo = #{photo,jdbcType=VARCHAR} ,create_by=#{createBy,jdbcType=VARCHAR} where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="onLine" parameterType="java.lang.Integer">
+        update banner set state= 1 where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="offLine" parameterType="java.lang.Integer">
+        update banner set state= 0 where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <delete id="deleteId" parameterType="java.lang.Integer">
+        delete from banner where id = #{id,jdbcType=BIGINT}
+    </delete>
+
+  </mapper>

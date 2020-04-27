@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!--    id给当前的sql语句起一个识别id，最好和接口一致
+        parameterType  限制传入参数类型-->
+<mapper namespace="com.chuilun.dao.messagesMapper">
+
+    <!--resultMap映射-->
+    <resultMap id="msgMap" type="com.chuilun.pojo.messages">
+        <id property="msgId" column="msg_id" jdbcType="BIGINT"/>
+        <result property="vistorName" column="vistor_name" jdbcType="VARCHAR" />
+        <result property="message" column="message" jdbcType="VARCHAR"/>
+        <result property="reply" column="reply" jdbcType="VARCHAR"/>
+        <result property="state" column="state" jdbcType="TINYINT"/>
+        <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+        <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
+        <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+        <result property="updateBy" column="update_by" jdbcType="VARCHAR"/>
+        <result property="threeworkName" column="threework_name" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <!--    主页面/重置  带分页-->
+    <select id="findAll" resultMap="msgMap">
+        select m.*,th.threework_name
+        from messages m join threework th
+        on m.three_id = th.three_id
+        order by create_at desc
+    </select>
+
+    <!--    根据作品名称/状态搜索-->
+    <select id="search" resultMap="msgMap">
+        select * from (select m.*,th.threework_name from messages m join threework th on m.three_id = th.three_id) as mt
+        where threework_name = #{threeworkName,jdbcType=VARCHAR} or state = #{state,jdbcType=TINYINT}
+        order by create_at desc
+    </select>
+
+<!--    根据id查询当前状态-->
+    <select id="findState"  parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select state  from  messages where msg_id = #{msgId,jdbcType=BIGINT}
+    </select>
+
+    <!--    游客添加留言-->
+    <insert id="addMsg" useGeneratedKeys="true" keyProperty="msgId" parameterType="com.chuilun.pojo.messages">
+        insert into messages (vistor_name,message,create_at) values (#{vistorName,jdbcType=VARCHAR},#{message,jdbcType=VARCHAR},now())
+</insert>
+
+<!--    添加回复-->
+    <update id="addReply" parameterType="com.chuilun.pojo.messages">
+        update messages set reply = #{reply,jdbcType=VARCHAR} where msg_id=#{msgId,jdbcType=BIGINT}
+    </update>
+
+    <!--  精选留言 -->
+    <update id="onLine" parameterType="java.lang.Integer">
+        UPDATE  messages SET state =1 WHERE msg_id = #{msgId,jdbcType=BIGINT}
+    </update>
+
+    <!--  普通留言 -->
+    <update id="offLine" parameterType="java.lang.Integer">
+        UPDATE  messages SET state =0 WHERE msg_id = #{msgId,jdbcType=BIGINT}
+    </update>
+
+    <!--    删除内容-->
+    <delete id="deleteId" parameterType="java.lang.Integer">
+        delete from messages where msg_id =#{msgId,jdbcType=BIGINT}
+</delete>
+
+</mapper>
+

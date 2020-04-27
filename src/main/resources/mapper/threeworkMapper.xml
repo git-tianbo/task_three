@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--    id给当前的sql语句起一个识别id，最好和接口一致
+        parameterType  限制传入参数类型-->
+<mapper namespace="com.chuilun.dao.threeworkMapper">
+
+<!--resultMap映射-->
+<resultMap id="threeworkMap" type="com.chuilun.pojo.threework">
+    <id property="threeId" column="three_id" jdbcType="BIGINT"/>
+    <result property="threeworkName" column="threework_name" jdbcType="VARCHAR"/>
+    <result property="briefIntro" column="brief_intro" jdbcType="VARCHAR"/>
+    <result property="thumbnailPicture" column="thumbnail_picture" jdbcType="VARCHAR"/>
+    <result property="video" column="video" jdbcType="VARCHAR"/>
+    <result property="picture" column="picture" jdbcType="VARCHAR"/>
+    <result property="intro" column="intro" jdbcType="VARCHAR"/>
+    <result property="state" column="state" jdbcType="TINYINT"/>
+    <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+    <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
+    <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+    <result property="updateBy" column="update_by" jdbcType="VARCHAR"/>
+    <result property="oneId" column="one_id" jdbcType="BIGINT"/>
+    <result property="twoId" column="two_id" jdbcType="BIGINT"/>
+    <result property="oneworkName" column="onework_name" jdbcType="VARCHAR" />
+    <result property="twoworkName" column="twowork_name" jdbcType="VARCHAR" />
+</resultMap>
+
+<!--    主页面/重置  带分页-->
+    <select id="findAll" resultMap="threeworkMap">
+    SELECT th.*,o.onework_name,tw.twowork_name
+    FROM threework th
+    INNER JOIN  onework o ON th.one_id = o.one_id
+    INNER JOIN  twowork tw ON th.two_id = tw.two_id
+    ORDER BY  create_at DESC
+    </select>
+
+<!--    根据姓名/状态搜索-->
+    <select id="search" resultMap="threeworkMap">
+    SELECT *  FROM  threework
+    <where>
+           <if test="threeworkName!=null and threeworkName!=''">
+              threework_name = #{threeworkName,jdbcType=VARCHAR}
+           </if>
+           <if  test="state!=null">
+               AND state = #{state,jdbcType=TINYINT}
+           </if>
+    </where>
+           ORDER BY create_at DESC
+    </select>
+
+<!--    根据id查询状态-->
+    <select id="state" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select state from threework where three_id=#{threeId,jdbcType=BIGINT}
+    </select>
+
+<!--    添加作品-->
+<insert id="addThree" useGeneratedKeys="true" keyProperty="threeId" parameterType="com.chuilun.pojo.threework">
+    INSERT INTO  threework(threework_name,brief_intro,thumbnail_picture,video,picture,intro,create_at,create_by,one_id,two_id)
+    VALUES (#{threeworkName,jdbcType=VARCHAR},#{briefIntro,jdbcType=VARCHAR},#{thumbnailPicture,jdbcType=VARCHAR},#{video,jdbcType=VARCHAR},#{picture,jdbcType=VARCHAR},#{intro,jdbcType=VARCHAR},now(),#{createBy,jdbcType=VARCHAR},#{oneId,jdbcType=BIGINT},#{twoId,jdbcType=BIGINT})
+</insert>
+
+<!--   更改内容-->
+<update id="putThree" parameterType="com.chuilun.pojo.threework">
+    UPDATE threework SET threework_name=#{threeworkName,jdbcType=VARCHAR},brief_intro=#{briefIntro,jdbcType=VARCHAR},thumbnail_picture=#{thumbnailPicture,jdbcType=VARCHAR},video=#{video,jdbcType=VARCHAR},picture=#{picture,jdbcType=VARCHAR},intro=#{intro,jdbcType=VARCHAR},one_id=#{oneId,jdbcType=BIGINT},two_id=#{twoId,jdbcType=BIGINT}
+    WHERE three_id = #{threeId,jdbcType=BIGINT}
+</update>
+
+    <!--  上架 -->
+    <update id="onLine" parameterType="java.lang.Integer">
+    UPDATE  threework SET state =1 WHERE three_id = #{threeId,jdbcType=BIGINT}
+</update>
+
+    <update id="offLine" parameterType="java.lang.Integer">
+    UPDATE  threework SET state =0 WHERE three_id = #{threeId,jdbcType=BIGINT}
+</update>
+
+<!--    删除内容-->
+<delete id="deleteId" parameterType="java.lang.Integer">
+    delete from threework where three_id=#{threeId,jdbcType=BIGINT}
+</delete>
+
+    </mapper>
+

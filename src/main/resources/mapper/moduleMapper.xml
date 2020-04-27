@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--    id给当前的sql语句起一个识别id，最好和接口一致
+        parameterType  限制传入参数类型-->
+<mapper namespace="com.chuilun.dao.moduleMapper">
+
+    <!--resultMap映射-->
+    <resultMap id="moduleMap" type="com.chuilun.pojo.modules">
+        <id property="moduleId" column="module_id" jdbcType="BIGINT"/>
+        <result property="moduleName" column="module_name" jdbcType="VARCHAR" />
+        <result property="prentID" column="prentID" jdbcType="BIGINT"/>
+        <result property="url" column="url" jdbcType="VARCHAR"/>
+        <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+        <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
+        <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+        <result property="updateBy" column="update_by" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--    主页面/重置  带分页-->
+    <select id="findAll" resultMap="moduleMap">
+        select *  from  modules order by create_at desc
+    </select>
+
+    <!--    根据姓名/状态搜索-->
+    <select id="search" resultMap="moduleMap">
+        select * from modules where module_name like "%"#{moduleName,jdbcType=VARCHAR}"%" order by create_at desc
+    </select>
+
+
+    <!--    新增模块-->
+    <insert id="addModule" useGeneratedKeys="true" keyProperty="moduleId" parameterType="com.chuilun.pojo.modules">
+        insert into modules (module_name,prentID,url,create_at,create_by)
+        values (#{moduleName,jdbcType=VARCHAR},#{prentID,jdbcType=BIGINT},#{url,jdbcType=VARCHAR},now(),#{createBy,jdbcType=VARCHAR})
+</insert>
+
+    <!--    编辑模块-->
+    <update id="putModule" parameterType="com.chuilun.pojo.modules">
+        update modules set module_name=#{moduleName,jdbcType=VARCHAR},prentID=#{prentID,jdbcType=BIGINT},url=#{url,jdbcType=VARCHAR},update_by=#{updateBy,jdbcType=BIGINT}
+        where module_id=#{moduleId,jdbcType=BIGINT}
+</update>
+
+    <!--    删除模块-->
+    <delete id="deleteId" parameterType="java.lang.Integer">
+        delete from modules where module_id=#{moduleId,jdbcType=BIGINT}
+</delete>
+
+</mapper>
+

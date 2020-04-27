@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.chuilun.dao.twoworkMapper">
+
+
+<resultMap id="twoWorkMap" type="com.chuilun.pojo.twowork" >
+    <id property="twoId" column="two_id" jdbcType="BIGINT"/>
+    <result property="twoworkName" column="twowork_name" jdbcType="VARCHAR" />
+    <result property="state" column="state" jdbcType="TINYINT"/>
+    <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+    <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
+    <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+    <result property="updateBy" column="update_by" jdbcType="VARCHAR"/>
+    <result property="oneId" column="one_id" jdbcType="BIGINT"/>
+    <result property="oneWorkName" column="onework_name" jdbcType="VARCHAR"/>
+</resultMap>
+
+<!--    主页面 重置-->
+    <select id="findAll" resultMap="twoWorkMap">
+        SELECT o.onework_name,t.*
+        FROM onework o INNER JOIN twowork t
+        ON o.one_id = t.one_id
+        ORDER BY create_at DESC
+    </select>
+
+<!--    根据名称 状态查找-->
+    <select id="search" resultMap="twoWorkMap">
+            SELECT * FROM  twowork
+            <where>
+                <if  test="twoworkName!=null and twoworkName!=''">
+                     twowork_name = #{twoworkName,jdbcType=VARCHAR}
+                </if>
+                <if  test="state!=null" >
+                    AND state = #{state,jdbcType=TINYINT}
+                </if>
+            </where>
+            ORDER BY create_at DESC
+        </select>
+
+<!--    根据id查询状态-->
+    <select id="state" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select state from twowork where two_id=#{twoId,jdbcType=BIGINT}
+    </select>
+
+<!--    添加（名字，所属1级作品集）-->
+    <insert id="addTwo" useGeneratedKeys="true" keyProperty="twoId" parameterType="twowork">
+            insert into twowork (twowork_name,create_at,one_id)
+            values (#{twoworkName,jdbcType=VARCHAR},now(),#{oneId,jdbcType=BIGINT})
+    </insert>
+
+<!--    更改名字-->
+    <update id="putName" parameterType="com.chuilun.pojo.twowork">
+            update twowork set twowork_name=#{twoworkName,jdbcType=VARCHAR} where two_id = #{twoId,jdbcType=BIGINT}
+    </update>
+
+<!--    上线-->
+    <update id="onLine" parameterType="java.lang.Integer">
+        update  twowork set state = 1 where two_id = #{twoId,jdbcType=BIGINT}
+    </update>
+
+<!--  下线-->
+    <update id="offLine" parameterType="java.lang.Integer">
+        update  twowork set state = 0 where two_id = #{twoId,jdbcType=BIGINT}
+    </update>
+
+<!--    根据id删除-->
+    <delete id="deleteId" parameterType="java.lang.Integer">
+        delete from twowork where two_id = #{twoId,jdbcType=BIGINT}
+    </delete>
+
+</mapper>

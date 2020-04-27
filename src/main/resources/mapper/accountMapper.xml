@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--    id给当前的sql语句起一个识别id，最好和接口一致
+        parameterType  限制传入参数类型-->
+<mapper namespace="com.chuilun.dao.accountMapper">
+
+    <!--resultMap映射-->
+    <resultMap id="accountMapper" type="com.chuilun.pojo.account">
+        <id property="accountId" column="account_id" jdbcType="BIGINT"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="roleName" column="role_name" jdbcType="VARCHAR"/>
+        <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+        <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
+        <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+        <result property="updateBy" column="update_by" jdbcType="VARCHAR"/>
+        <result property="roleId" column="role_id" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <!--    主页面/重置  带分页-->
+    <select id="findAll" resultMap="accountMapper">
+        select a.*,r.role_name from account a
+        join role r
+        ON a.role_id = r.role_id
+        order by create_at desc
+    </select>
+
+    <!--    根据姓名/状态搜索-->
+    <select id="search" resultMap="accountMapper">
+    select * from (select a.*,r.role_name from account a join role r ON a.role_id = r.role_id) as ar where role_name like "%"#{roleName,jdbcType=VARCHAR}"%" or username like "%"#{username,jdbcType=VARCHAR}"%" ORDER BY create_at DESC
+    </select>
+
+<!--    查找账户是否存在-->
+    <select id="loginByUser" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(*) from account where username =#{username,jdbcType=VARCHAR};
+    </select>
+
+    <!--    根据账户获得密码-->
+    <select id="getPassword" parameterType="java.lang.String" resultType="java.lang.String">
+        select password from account where username =#{username,jdbcType=VARCHAR};
+    </select>
+
+    <!--    添加新账户   带角色  -->
+    <insert id="addAccount"  useGeneratedKeys="true" keyProperty="accountId" parameterType="com.chuilun.pojo.account">
+    insert into account(username,password,create_at,role_id) values (#{username,jdbcType=VARCHAR},#{password,jdbcType=VARCHAR},now(),#{roleId,jdbcType=BIGINT})
+</insert>
+
+    <!--    更改账户信息-->
+    <update id="putAccount" parameterType="com.chuilun.pojo.account">
+    update account set username=#{username,jdbcType=VARCHAR},password=#{password,jdbcType=VARCHAR},role_id=#{roleId,jdbcType=BIGINT} where account_id = #{accountId,jdbcType=BIGINT}
+</update>
+
+    <!--    删除内容-->
+    <delete id="deleteId" parameterType="java.lang.Integer">
+    delete from account where account_id = #{accountId,jdbcType=BIGINT}
+</delete>
+
+</mapper>
+
